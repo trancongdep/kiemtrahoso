@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QL Hồ Sơ Đường Dây - V30.2</title>
+    <title>QL Hồ Sơ Đường Dây - V30.4</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -68,7 +68,7 @@
     <div id="view-mobile" class="container pb-5">
         <div class="mobile-header text-center">
             <h5 class="m-0"><i class="fas fa-mobile-alt"></i> Thu Thập Hồ Sơ</h5>
-            <small>Version 30.2</small>
+            <small>Version 30.4</small>
         </div>
 
         <div class="px-2 mb-3">
@@ -88,7 +88,7 @@
                 <div class="input-group">
                     <select id="mobileLineSelect" class="form-select form-select-lg" onchange="loadMobileData()">
                         <option value="">-- Chưa chọn tuyến --</option>
-                        </select>
+                    </select>
                     <button class="btn btn-success" onclick="openCreateModal()">
                         <i class="fas fa-plus"></i>
                     </button>
@@ -111,7 +111,7 @@
         <nav class="navbar navbar-light bg-white shadow-sm mb-4 rounded">
             <div class="container-fluid">
                 <span class="navbar-brand mb-0 h1 text-primary"><i class="fas fa-network-wired"></i> Quản Lý Hồ Sơ Đường Dây</span>
-                <span class="badge bg-info text-dark">Dashboard V30.2</span>
+                <span class="badge bg-info text-dark">Dashboard V30.4</span>
             </div>
         </nav>
 
@@ -206,7 +206,12 @@
         const CLIENT_ID = '983786300982-p1ur9tei1232rlf5bh1iq2c3adbt4v4t.apps.googleusercontent.com'; 
         const API_KEY = 'AIzaSyAVfpu0kLtDEp3t6ZNLS9HpKVnzSsq_hrw';
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        
+        // --- QUAN TRỌNG: ĐỔI SCOPE SANG QUYỀN TOÀN BỘ ĐỂ GHI ĐƯỢC VÀO FOLDER CÓ SẴN ---
+        const SCOPES = 'https://www.googleapis.com/auth/drive'; 
+        
+        // --- CẤU HÌNH FOLDER UPLOAD ---
+        const TARGET_FOLDER_ID = '1oxAXRcnDwX0l0dybDKXqnW-B_cP7ub6j'; 
 
         // --- Danh mục Hồ sơ chuẩn ---
         const DOC_CATEGORIES = {
@@ -227,9 +232,6 @@
                 { id: 'vat_tu', name: 'Sổ theo dõi vật tư dự phòng' }
             ]
         };
-
-        // Dữ liệu mẫu ban đầu: TRỐNG
-        const INIT_LINES = {}; 
 
         // ================= 2. GOOGLE DRIVE LOGIC =================
         let tokenClient;
@@ -271,6 +273,7 @@
                 document.getElementById('auth_message').textContent = 'Đã kết nối Drive';
                 document.getElementById('auth_message').className = 'badge bg-success';
             };
+            // Lưu ý: Sẽ hiện cảnh báo "Google hasn't verified this app" -> Chọn Advanced -> Go to ... (unsafe)
             tokenClient.requestAccessToken({ prompt: 'consent' });
         };
 
@@ -295,9 +298,11 @@
             const file = fileInput.files[0];
             if (!file) { alert("Chưa chọn file!"); return; }
 
+            // Metadata: Chứa ID Folder
             const metadata = {
                 'name': `${lineId}_${docId}_${file.name}`,
-                'mimeType': file.type
+                'mimeType': file.type,
+                'parents': [TARGET_FOLDER_ID] 
             };
 
             const accessToken = gapi.client.getToken().access_token;
@@ -324,7 +329,7 @@
                     fileInput.value = '';
                 } else {
                     console.error(data);
-                    throw new Error("Không nhận được ID file.");
+                    alert("Lỗi: Không nhận được ID file. Kiểm tra lại quyền Chia sẻ của thư mục.");
                 }
             } catch (error) {
                 console.error(error);
@@ -337,17 +342,12 @@
 
         // ================= 3. FIREBASE LOGIC =================
         
-        // Khởi tạo và Lắng nghe
+        let currentLineId = '';
+
         db.ref('lines').on('value', (snapshot) => {
             const data = snapshot.val() || {};
-            
-            // Xử lý Selectbox Mobile
             renderLineSelect(data);
-            
-            // Xử lý Dashboard
             renderDashboard(data);
-            
-            // Nếu đang chọn một tuyến, reload lại nội dung tuyến đó
             if (currentLineId && data[currentLineId]) {
                 loadMobileData(data[currentLineId]);
             }
@@ -363,7 +363,6 @@
             db.ref().update(updates);
         }
 
-        // Tạo tuyến mới
         function handleCreateLine() {
             const name = document.getElementById('newLineName').value;
             if(!name.trim()) {
@@ -376,18 +375,15 @@
                 name: name,
                 created_at: new Date().toISOString()
             }).then(() => {
-                // Đóng modal
                 const modalEl = document.getElementById('createLineModal');
                 const modal = bootstrap.Modal.getInstance(modalEl);
                 modal.hide();
                 document.getElementById('newLineName').value = '';
                 
-                // Tự động chọn tuyến mới tạo
                 currentLineId = newId;
-                // Hàm renderLineSelect sẽ chạy lại do on('value'), ta cần đợi 1 chút để selectbox cập nhật
                 setTimeout(() => {
                     document.getElementById('mobileLineSelect').value = newId;
-                    loadMobileData(); // Load nội dung rỗng
+                    loadMobileData(); 
                     alert(`Đã tạo mới: ${name}`);
                 }, 500);
             });
@@ -396,8 +392,6 @@
         // ================= 4. UI LOGIC =================
         
         let currentView = 'mobile'; 
-        let currentLineId = '';
-        let createModal;
 
         function toggleView() {
             if (currentView === 'mobile') {
@@ -420,7 +414,7 @@
         function renderLineSelect(lines) {
             const select = document.getElementById('mobileLineSelect');
             const emptyMsg = document.getElementById('empty-state-msg');
-            const currentVal = select.value || currentLineId; // Giữ giá trị đang chọn nếu có
+            const currentVal = select.value || currentLineId; 
 
             select.innerHTML = '<option value="">-- Chọn tuyến --</option>';
             
@@ -434,7 +428,6 @@
                 }
             }
 
-            // Restore selection
             if(currentVal && lines[currentVal]) {
                 select.value = currentVal;
             }
@@ -455,7 +448,6 @@
                 return;
             }
 
-            // Nếu gọi từ onchange (chưa có data), fetch từ DB (nhưng thực tế on 'value' đã handle, đây là fallback)
             if (!lineData) {
                 db.ref(`lines/${currentLineId}`).once('value', s => {
                     renderMobileList(s.val());
@@ -568,12 +560,10 @@
                  tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Chưa có dữ liệu. Hãy thêm tuyến mới ở giao diện Mobile.</td></tr>';
             }
 
-            // Update Stats Cards
             document.getElementById('totalLines').innerText = totalLines;
             document.getElementById('totalCompletedDocs').innerText = totalDocsDone;
             document.getElementById('missingDocs').innerText = totalDocsNeeded - totalDocsDone;
         }
-
     </script>
 </body>
 </html>
