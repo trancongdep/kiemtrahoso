@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QL Hồ Sơ Đường Dây - V30.1</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --bg-light: #f8f9fa;
+        }
+        body { background-color: var(--bg-light); font-family: 'Segoe UI', sans-serif; }
+        
+        /* Mobile Specific */
+        .mobile-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 20px;
+        }
+        .record-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+        }
+        .record-card:active { transform: scale(0.98); }
+        
+        /* Dashboard Specific */
+        .dashboard-container { padding: 20px; }
+        .stat-card {
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .progress-xs { height: 8px; border-radius: 4px; }
+        
+        /* Floating Action Button for View Switch */
+        .fab-switch {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #343a40;
+            color: white;
+            border-radius: 50px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="fab-switch" onclick="toggleView()">
+        <i class="fas fa-sync"></i> Đổi Giao Diện (Mobile/PC)
+    </button>
+
+    <div id="view-mobile" class="container pb-5">
+        <div class="mobile-header text-center">
+            <h5 class="m-0"><i class="fas fa-mobile-alt"></i> Thu Thập Hồ Sơ</h5>
+            <small>Version 30.1</small>
+        </div>
+
+        <div class="mb-4 px-2">
+            <label class="form-label fw-bold">Chọn Tuyến Dây / Cáp Ngầm</label>
+            <select id="mobileLineSelect" class="form-select form-select-lg" onchange="loadMobileData()">
+                <option value="">-- Chọn tuyến --</option>
+                </select>
+        </div>
+
+        <div class="px-2 mb-3">
+            <div id="auth-status" class="alert alert-secondary d-flex justify-content-between align-items-center p-2">
+                <small><i class="fab fa-google"></i> Trạng thái Drive</small>
+                <div id="auth-buttons">
+                    <button id="authorize_button" class="btn btn-sm btn-primary" style="display: none;">Đăng nhập Google</button>
+                    <button id="signout_button" class="btn btn-sm btn-outline-danger" style="display: none;" onclick="handleSignout()">Đăng xuất</button>
+                </div>
+                <span id="auth_message" class="badge bg-secondary">Đang tải...</span>
+            </div>
+        </div>
+
+        <div id="mobileRecordList" class="px-2">
+            <div class="text-center text-muted mt-5">Vui lòng chọn tuyến dây để bắt đầu</div>
+        </div>
+    </div>
+
+    <div id="view-dashboard" class="container-fluid dashboard-container d-none">
+        <nav class="navbar navbar-light bg-white shadow-sm mb-4 rounded">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1 text-primary"><i class="fas fa-network-wired"></i> Quản Lý Hồ Sơ Đường Dây</span>
+                <span class="badge bg-info text-dark">Dashboard V30.1</span>
+            </div>
+        </nav>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card bg-primary">
+                    <h3><i class="fas fa-bolt"></i> <span id="totalLines">0</span></h3>
+                    <p class="mb-0">Tổng số Tuyến dây</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-success">
+                    <h3><i class="fas fa-check-circle"></i> <span id="totalCompletedDocs">0</span></h3>
+                    <p class="mb-0">Hồ sơ đã số hóa</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-warning text-dark">
+                    <h3><i class="fas fa-exclamation-triangle"></i> <span id="missingDocs">0</span></h3>
+                    <p class="mb-0">Hồ sơ còn thiếu</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-primary">Tiến độ Số hóa từng Tuyến</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên Tuyến</th>
+                                <th style="width: 30%">Tiến độ</th>
+                                <th>Hồ sơ Kỹ thuật</th>
+                                <th>Hồ sơ Vận hành</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+    <script>
+        // ================= 1. CẤU HÌNH (CONFIG) =================
+        
+        // --- Firebase Config ---
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
+            authDomain: "tavietnam-78ae8.firebaseapp.com", 
+            projectId: "tavietnam-78ae8", 
+            storageBucket: "tavietnam-78ae8.firebasestorage.app", 
+            messagingSenderId: "670121705534", 
+            appId: "1:670121705534:web:1027ad98550573ad37116f" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- Google Drive API Config (UPDATED) ---
+        const CLIENT_ID = '983786300982-p1ur9tei1232rlf5bh1iq2c3adbt4v4t.apps.googleusercontent.com'; // Đã cập nhật
+        const API_KEY = 'AIzaSyAVfpu0kLtDEp3t6ZNLS9HpKVnzSsq_hrw'; // Đã cập nhật
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+        // --- Danh mục Hồ sơ chuẩn ---
+        const DOC_CATEGORIES = {
+            TECHNICAL: [
+                { id: 'phap_ly', name: 'Văn bản pháp lý & Thiết kế duyệt' },
+                { id: 'nghiem_thu_ngam', name: 'Biên bản nghiệm thu phần ngầm' },
+                { id: 'nghiem_thu_noi', name: 'Biên bản nghiệm thu phần nổi/kéo dây' },
+                { id: 'tiep_dia', name: 'Hồ sơ đo điện trở tiếp địa' },
+                { id: 'tai_lieu_sx', name: 'Tài liệu NSX (CO/CQ, Catalogue)' },
+                { id: 'ban_ve_hoan_cong', name: 'Bản vẽ hoàn công' },
+                { id: 'dong_dien', name: 'Kết luận cho phép đóng điện' }
+            ],
+            OPERATIONAL: [
+                { id: 'nhiem_vu', name: 'Văn bản giao nhiệm vụ/Tổ quản lý' },
+                { id: 'ly_lich', name: 'Lý lịch đường dây (Thông số)' },
+                { id: 'nhat_ky', name: 'Nhật ký vận hành' },
+                { id: 'kiem_tra_dinh_ky', name: 'Phiếu kiểm tra định kỳ gần nhất' },
+                { id: 'vat_tu', name: 'Sổ theo dõi vật tư dự phòng' }
+            ]
+        };
+
+        // Dữ liệu mẫu ban đầu (Nếu DB trống)
+        const INIT_LINES = {
+            "line_01": { name: "Đường dây 22kV 471 E1.1" },
+            "line_02": { name: "Cáp ngầm 22kV XT 473" },
+            "line_03": { name: "Đường dây hạ thế Khu A" }
+        };
+
+        // ================= 2. GOOGLE DRIVE LOGIC =================
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        function gapiLoaded() {
+            gapi.load('client', intializeGapiClient);
+        }
+
+        async function intializeGapiClient() {
+            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+            gapiInited = true;
+            maybeEnableButtons();
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // Sẽ định nghĩa khi request
+            });
+            gisInited = true;
+            maybeEnableButtons();
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                document.getElementById('authorize_button').style.display = 'block';
+                document.getElementById('auth_message').textContent = 'Sẵn sàng kết nối';
+            }
+        }
+
+        // Xử lý đăng nhập Google
+        document.getElementById('authorize_button').onclick = () => {
+            tokenClient.callback = async (resp) => {
+                if (resp.error) throw resp;
+                document.getElementById('authorize_button').style.display = 'none';
+                document.getElementById('signout_button').style.display = 'block';
+                document.getElementById('auth_message').textContent = 'Đã kết nối Drive';
+                document.getElementById('auth_message').className = 'badge bg-success';
+            };
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        };
+
+        function handleSignout() {
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token);
+                gapi.client.setToken('');
+                document.getElementById('authorize_button').style.display = 'block';
+                document.getElementById('signout_button').style.display = 'none';
+                document.getElementById('auth_message').textContent = 'Đã đăng xuất';
+                document.getElementById('auth_message').className = 'badge bg-secondary';
+            }
+        }
+
+        // Hàm Upload file lên Drive
+        async function uploadToDrive(fileInputId, lineId, docId) {
+            // Kiểm tra Auth
+            if (!gapi.client.getToken()) {
+                alert("Vui lòng nhấn 'Đăng nhập Google' ở trên cùng trước!");
+                return;
+            }
+
+            const fileInput = document.getElementById(fileInputId);
+            const file = fileInput.files[0];
+            if (!file) { alert("Chưa chọn file!"); return; }
+
+            // Metadata
+            const metadata = {
+                'name': `${lineId}_${docId}_${file.name}`,
+                'mimeType': file.type,
+                // 'parents': ['ID_THU_MUC_NEU_CAN'] // Có thể thêm ID thư mục nếu muốn
+            };
+
+            // Upload Logic (Multipart)
+            const accessToken = gapi.client.getToken().access_token;
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', file);
+
+            // Hiển thị loading
+            const btn = fileInput.parentElement.querySelector('.btn-upload');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+                    method: 'POST',
+                    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+                    body: form
+                });
+                const data = await response.json();
+                
+                if (data.id) {
+                    // Thành công -> Lưu link vào Firebase
+                    saveToFirebase(lineId, docId, data.webViewLink);
+                    alert("Upload thành công!");
+                    // Reset input
+                    fileInput.value = '';
+                } else {
+                    console.error(data);
+                    throw new Error("Không nhận được ID file. Kiểm tra console.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi upload: " + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ================= 3. FIREBASE LOGIC =================
+        
+        // Khởi tạo dữ liệu nếu chưa có
+        db.ref('lines').once('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                db.ref('lines').set(INIT_LINES);
+            }
+            // Load dropdown cho Mobile
+            renderLineSelect(snapshot.val() || INIT_LINES);
+            // Load Dashboard
+            renderDashboard(snapshot.val() || INIT_LINES);
+        });
+
+        // Lắng nghe thay đổi dữ liệu (Realtime update)
+        db.ref('lines').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(!data) return;
+            if (currentView === 'dashboard') renderDashboard(data);
+            if (currentView === 'mobile' && currentLineId) loadMobileData(data[currentLineId]);
+        });
+
+        function saveToFirebase(lineId, docId, link, note = '') {
+            const updates = {};
+            updates[`lines/${lineId}/records/${docId}/has_file`] = true;
+            updates[`lines/${lineId}/records/${docId}/link`] = link;
+            updates[`lines/${lineId}/records/${docId}/updated_at`] = new Date().toISOString();
+            if(note) updates[`lines/${lineId}/records/${docId}/note`] = note;
+            
+            db.ref().update(updates);
+        }
+
+        // ================= 4. UI LOGIC =================
+        
+        let currentView = 'mobile'; // mobile | dashboard
+        let currentLineId = '';
+
+        function toggleView() {
+            if (currentView === 'mobile') {
+                document.getElementById('view-mobile').classList.add('d-none');
+                document.getElementById('view-dashboard').classList.remove('d-none');
+                currentView = 'dashboard';
+                // Reload dashboard data
+                db.ref('lines').once('value', s => renderDashboard(s.val()));
+            } else {
+                document.getElementById('view-dashboard').classList.add('d-none');
+                document.getElementById('view-mobile').classList.remove('d-none');
+                currentView = 'mobile';
+            }
+        }
+
+        function renderLineSelect(lines) {
+            const select = document.getElementById('mobileLineSelect');
+            select.innerHTML = '<option value="">-- Chọn tuyến --</option>';
+            if(lines) {
+                for (const [id, info] of Object.entries(lines)) {
+                    select.innerHTML += `<option value="${id}">${info.name}</option>`;
+                }
+            }
+        }
+
+        function loadMobileData(lineData = null) {
+            const select = document.getElementById('mobileLineSelect');
+            currentLineId = select.value;
+            const container = document.getElementById('mobileRecordList');
+            container.innerHTML = '';
+
+            if (!currentLineId) {
+                container.innerHTML = '<div class="text-center text-muted mt-5">Vui lòng chọn tuyến dây</div>';
+                return;
+            }
+
+            // Nếu không truyền lineData vào (do gọi từ onchange), thì fetch lại
+            if (!lineData) {
+                db.ref(`lines/${currentLineId}`).once('value', s => {
+                    renderMobileList(s.val());
+                });
+            } else {
+                renderMobileList(lineData);
+            }
+        }
+
+        function renderMobileList(lineData) {
+            const container = document.getElementById('mobileRecordList');
+            if(!lineData) return;
+            const records = lineData.records || {};
+
+            let html = '';
+
+            // Helper render group
+            const renderGroup = (title, items) => {
+                let groupHtml = `<h6 class="text-uppercase fw-bold text-muted mt-4 mb-3 border-bottom pb-2">${title}</h6>`;
+                items.forEach(item => {
+                    const rec = records[item.id] || {};
+                    const hasFile = rec.has_file ? 'checked' : '';
+                    const link = rec.link || '';
+                    const statusColor = rec.has_file ? 'text-success' : 'text-danger';
+                    const statusIcon = rec.has_file ? 'fa-check-circle' : 'fa-times-circle';
+
+                    groupHtml += `
+                    <div class="card record-card p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold text-dark"><i class="fas ${statusIcon} ${statusColor} me-2"></i>${item.name}</span>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" ${hasFile} disabled>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-light p-2 rounded">
+                            ${link ? `<div class="mb-2"><a href="${link}" target="_blank" class="btn btn-sm btn-outline-success w-100"><i class="fas fa-external-link-alt"></i> Xem Tài liệu</a></div>` : ''}
+                            
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="file" class="form-control" id="file_${item.id}">
+                                <button class="btn btn-primary btn-upload" onclick="uploadToDrive('file_${item.id}', '${currentLineId}', '${item.id}')">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </button>
+                            </div>
+
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" placeholder="Hoặc dán link..." id="link_${item.id}" value="${link}">
+                                <button class="btn btn-outline-secondary" onclick="saveToFirebase('${currentLineId}', '${item.id}', document.getElementById('link_${item.id}').value)">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                return groupHtml;
+            };
+
+            html += renderGroup('1. Hồ sơ Kỹ thuật (Gốc)', DOC_CATEGORIES.TECHNICAL);
+            html += renderGroup('2. Hồ sơ Vận hành (Hàng ngày)', DOC_CATEGORIES.OPERATIONAL);
+            
+            container.innerHTML = html;
+        }
+
+        // --- DASHBOARD LOGIC ---
+        function renderDashboard(lines) {
+            const tbody = document.getElementById('dashboardTableBody');
+            tbody.innerHTML = '';
+            
+            let totalLines = 0;
+            let totalDocsNeeded = 0;
+            let totalDocsDone = 0;
+
+            const totalItemsPerLine = DOC_CATEGORIES.TECHNICAL.length + DOC_CATEGORIES.OPERATIONAL.length;
+
+            if(lines) {
+                Object.entries(lines).forEach(([id, line]) => {
+                    totalLines++;
+                    const records = line.records || {};
+                    let doneCount = 0;
+                    
+                    // Đếm số lượng đã có
+                    [...DOC_CATEGORIES.TECHNICAL, ...DOC_CATEGORIES.OPERATIONAL].forEach(cat => {
+                        if (records[cat.id] && records[cat.id].has_file) doneCount++;
+                    });
+
+                    totalDocsNeeded += totalItemsPerLine;
+                    totalDocsDone += doneCount;
+
+                    const percent = Math.round((doneCount / totalItemsPerLine) * 100);
+                    let progressClass = 'bg-danger';
+                    if (percent > 50) progressClass = 'bg-warning';
+                    if (percent === 100) progressClass = 'bg-success';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold">${line.name}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2 text-muted small">${percent}%</span>
+                                    <div class="progress progress-xs flex-grow-1">
+                                        <div class="progress-bar ${progressClass}" style="width: ${percent}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">Chi tiết</span></td>
+                            <td><span class="badge bg-light text-dark border">Chi tiết</span></td>
+                            <td>${percent === 100 ? '<span class="badge bg-success">Hoàn thành</span>' : '<span class="badge bg-secondary">Đang CN</span>'}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Update Stats Cards
+            document.getElementById('totalLines').innerText = totalLines;
+            document.getElementById('totalCompletedDocs').innerText = totalDocsDone;
+            document.getElementById('missingDocs').innerText = totalDocsNeeded - totalDocsDone;
+        }
+
+    </script>
+</body>
+</html>
