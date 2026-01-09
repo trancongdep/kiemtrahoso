@@ -2,11 +2,17 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Hồ Sơ QLKT & QLVH - Version 1.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Hồ Sơ QLKT & QLVH - Version 1.2 (Mobile)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Tùy chỉnh thanh cuộn cho đẹp hơn */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        
         .loader {
             border-top-color: #3498db;
             -webkit-animation: spinner 1.5s linear infinite;
@@ -16,79 +22,76 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Custom checkbox size */
+        /* Checkbox to hơn cho mobile */
         input[type=checkbox] {
-            transform: scale(1.5);
+            transform: scale(1.6);
+            margin: 5px;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen text-sm">
-
-    <div class="container mx-auto p-4 max-w-full lg:max-w-7xl">
-        
-        <header class="bg-blue-800 text-white p-4 rounded-t-lg shadow-md flex justify-between items-center sticky top-0 z-50">
+<body class="bg-gray-100 min-h-screen text-sm pb-24"> <header class="bg-blue-800 text-white p-3 shadow-md flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center overflow-hidden">
+            <i class="fas fa-bolt text-yellow-400 mr-2 text-lg"></i>
             <div>
-                <h1 class="text-xl font-bold uppercase"><i class="fas fa-tasks mr-2"></i>Quản Lý Hồ Sơ QLKT, QLVH TỔ 2</h1>
-                <p class="text-blue-200 text-xs mt-1">Version 1.1 - Checkbox & Image Upload Support</p>
+                <h1 class="font-bold uppercase text-sm md:text-lg truncate leading-tight">QL Hồ Sơ Tổ 2</h1>
+                <p class="text-blue-300 text-[10px] hidden md:block">Version 1.2 - Mobile Optimized</p>
             </div>
-            <div id="status-indicator" class="flex items-center space-x-2 bg-blue-900 px-3 py-1 rounded-full">
-                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                <span class="text-xs">Đang kết nối...</span>
-            </div>
-        </header>
+        </div>
+        <div id="status-indicator" class="flex items-center px-2 py-1 bg-blue-900 rounded-full ml-2 flex-shrink-0">
+            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1"></div>
+            <span class="text-[10px] font-bold">Kết nối...</span>
+        </div>
+    </header>
 
-        <div class="bg-white p-4 shadow-md mb-4 border-b border-gray-200 sticky top-20 z-40">
-            <div class="flex flex-wrap gap-4 items-end justify-between">
-                <div class="w-full md:w-1/3">
-                    <label class="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wide">Chọn Tuyến Đường Dây / Trạm:</label>
-                    <div class="relative">
-                        <select id="routeSelect" class="block appearance-none w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500">
-                            <option value="" disabled selected>-- Vui lòng chọn hồ sơ --</option>
-                            </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </div>
+    <div class="container mx-auto p-2 md:p-4 max-w-7xl">
+        
+        <div class="bg-white p-3 rounded-lg shadow-sm mb-4 border border-gray-200 sticky top-[50px] z-40">
+            <label class="block text-gray-500 text-[10px] font-bold uppercase mb-1">Chọn Tuyến / Trạm:</label>
+            <div class="flex gap-2">
+                <div class="relative w-full">
+                    <select id="routeSelect" class="block appearance-none w-full bg-gray-50 border border-gray-300 text-gray-800 py-2 px-3 pr-8 rounded focus:outline-none focus:border-blue-500 font-medium text-sm">
+                        <option value="" disabled selected>-- Chọn hồ sơ làm việc --</option>
+                        </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <i class="fas fa-chevron-down text-xs"></i>
                     </div>
                 </div>
-                
-                <div class="flex space-x-2">
-                    <button onclick="loadData()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition flex items-center">
-                        <i class="fas fa-sync-alt mr-2"></i> Tải lại
-                    </button>
-                    <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition flex items-center font-bold">
-                        <i class="fas fa-save mr-2"></i> LƯU DỮ LIỆU
-                    </button>
-                </div>
+                <button onclick="loadData()" class="bg-gray-200 text-gray-600 px-3 rounded hover:bg-gray-300 transition flex-shrink-0" title="Tải lại">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
             </div>
         </div>
 
-        <div class="bg-white shadow-lg rounded-b-lg overflow-hidden min-h-[500px]">
-            <div id="loading" class="hidden flex justify-center items-center p-20">
-                <div class="flex flex-col items-center">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-                    <span class="text-gray-500">Đang tải dữ liệu...</span>
-                </div>
-            </div>
+        <div id="loading" class="hidden flex justify-center items-center p-10">
+            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10"></div>
+        </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full leading-normal">
-                    <thead>
-                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal border-b-2 border-gray-200">
-                            <th class="py-3 px-4 text-center w-10">STT</th>
-                            <th class="py-3 px-4 text-left">Danh Mục Hồ Sơ</th>
-                            <th class="py-3 px-4 text-center w-24" title="Tích chọn nếu Có">Có</th>
-                            <th class="py-3 px-4 text-left w-48">Số lượng / Ghi chú</th>
-                            <th class="py-3 px-4 text-left w-64">Hình ảnh minh chứng</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="text-gray-700 text-sm">
-                        </tbody>
-                </table>
-            </div>
+        <div class="bg-transparent md:bg-white md:shadow-lg md:rounded-lg overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="hidden md:table-header-group">
+                    <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal border-b-2 border-gray-200">
+                        <th class="py-3 px-4 text-center w-12">STT</th>
+                        <th class="py-3 px-4">Nội dung hồ sơ</th>
+                        <th class="py-3 px-4 text-center w-20">Có</th>
+                        <th class="py-3 px-4 w-1/3">Ghi chú / Số lượng</th>
+                        <th class="py-3 px-4 w-40">Hình ảnh</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="block md:table-row-group">
+                    </tbody>
+            </table>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-5 right-5 px-6 py-4 rounded-lg shadow-xl transform translate-y-24 transition-all duration-300 z-50 flex items-center font-medium">
+    <button onclick="saveData()" class="fixed bottom-6 right-4 bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl z-50 hover:bg-blue-700 active:scale-95 transition-all duration-200 border-2 border-white">
+        <i class="fas fa-save"></i>
+    </button>
+    
+    <div class="fixed bottom-6 right-20 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-70 pointer-events-none hidden md:block">
+        Lưu dữ liệu
+    </div>
+
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 px-4 py-3 rounded-lg shadow-xl transition-all duration-300 z-[60] flex items-center font-medium opacity-0 pointer-events-none min-w-[200px] justify-center text-sm">
         <span>Thông báo</span>
     </div>
 
@@ -109,13 +112,11 @@
             appId: "1:670121705534:web:1027ad98550573ad37116f" 
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const storage = getStorage(app);
 
         // --- DATA DEFINITIONS ---
-        // Danh sách các tuyến từ file Excel
         const routes = [
             "AK_VT (An Khánh - Việt Thành)", "BL-HX (Bình Lợi - Hỏa Xa)", "BT_TDA (Bình Triệu - Thanh Đa)",
             "BT_HBP (Bình Thái - Hiệp Bình Phước)", "BT_HX (Bình Triệu - Hỏa Xa)", "CL-TDD (Cát Lái - Thủ Đức Đông)",
@@ -139,46 +140,42 @@
             "PHĐ-TĐ (Phú Hòa Đông - Tân Định)"
         ];
 
-        // Cấu trúc hồ sơ chuẩn
         const categories = [
             {
-                id: "A", title: "A. HSQLVH (Hồ sơ quản lý vận hành)", 
+                id: "A", title: "A. HSQLVH (Vận hành)", 
                 items: [
                     "Thông số kỹ thuật ĐZ", "Bảng theo dõi đóng cắt", "Bảng Theo dõi Sự cố", "Bảng theo dõi Phụ tải",
-                    "Bảng Theo dõi kỹ thuật hành lang", "Bảng theo dõi công tác đại tu", "Bảng tổng hợp tồn tại",
-                    "Bảng phân bố cột", "Bảng giao chéo", "Bảng đo độ võng (khi có thay đổi)",
-                    "Bảng báo cáo nhiệt độ (6 tháng/1 lần)", "Bảng báo cáo điện trở (1 năm/1 lần)",
-                    "Hồ sơ thứ tự pha (khi có thay đổi)", "Hình Ảnh trụ", "Biên bản KTĐK ngày (1 tháng/1 lần)",
-                    "Biên bản KTĐK đêm (3 tháng/1 lần)", "Hồ sơ theo dõi nhà / công trình"
+                    "Bảng Theo dõi KT hành lang", "Bảng theo dõi đại tu", "Bảng tổng hợp tồn tại",
+                    "Bảng phân bố cột", "Bảng giao chéo", "Bảng đo độ võng",
+                    "Báo cáo nhiệt độ (6 tháng)", "Báo cáo điện trở (1 năm)",
+                    "Hồ sơ thứ tự pha", "Hình Ảnh trụ", "Biên bản KTĐK ngày (1 tháng)",
+                    "Biên bản KTĐK đêm (3 tháng)", "Hồ sơ theo dõi nhà/công trình"
                 ]
             },
             {
-                id: "B", title: "B. HSQLKT (Hồ sơ quản lý kỹ thuật)", 
+                id: "B", title: "B. HSQLKT (Kỹ thuật)", 
                 subsections: [
                     {
-                        title: "I. Hồ sơ thiết kế được duyệt",
+                        title: "I. Hồ sơ thiết kế",
                         items: ["Hồ sơ móng trụ", "Hồ sơ đền bù", "Hồ sơ nghiệm thu", "Hồ sơ thiết kế", "Hồ sơ dự thầu"]
                     },
                     {
                         title: "II. Hồ sơ hoàn công",
-                        items: ["Hồ sơ hoàn công phần móng trụ", "Hồ sơ hoàn công phần trụ", "Hồ sơ hoàn công phần dây dẫn, dây chống sét",
-                                "Hồ sơ hoàn công phần tiếp địa", "Biên bản nghiệm thu", "Tài liệu của nhà chế tạo"]
+                        items: ["HS hoàn công móng trụ", "HS hoàn công trụ", "HS hoàn công dây dẫn/chống sét",
+                                "HS hoàn công tiếp địa", "Biên bản nghiệm thu", "Tài liệu nhà chế tạo"]
                     }
                 ]
             }
         ];
 
-        // --- APP STATE ---
-        let currentUploadBtn = null; // Track which button triggered upload
+        let currentUploadBtn = null;
         let currentRouteCode = null;
 
-        // --- UI FUNCTIONS ---
         function initApp() {
             const statusIndicator = document.getElementById('status-indicator');
             if(db) {
-                statusIndicator.innerHTML = '<i class="fas fa-check-circle text-green-400 mr-1"></i><span class="text-xs text-green-200 font-bold">Đã kết nối Firebase</span>';
-                statusIndicator.classList.remove('bg-blue-900');
-                statusIndicator.classList.add('bg-green-800');
+                statusIndicator.innerHTML = '<div class="w-2 h-2 bg-green-400 rounded-full mr-1"></div><span class="text-[10px] text-green-200">Online</span>';
+                statusIndicator.classList.replace('bg-blue-900', 'bg-green-800');
             }
 
             const select = document.getElementById('routeSelect');
@@ -195,9 +192,7 @@
                 loadData();
             });
 
-            // Handle global file input change
             document.getElementById('globalFileInput').addEventListener('change', handleFileSelect);
-
             renderTable({});
         }
 
@@ -206,15 +201,13 @@
             tbody.innerHTML = '';
 
             categories.forEach(cat => {
-                // Category Header
-                const catRow = `<tr class="bg-blue-50 text-blue-800 font-bold"><td colspan="5" class="py-3 px-4">${cat.title}</td></tr>`;
+                // Tiêu đề lớn
+                const catRow = `<tr class="block md:table-row bg-blue-50 border-b md:border-none mt-4 md:mt-0 rounded-t-lg"><td colspan="5" class="py-2 px-3 text-blue-800 font-bold uppercase text-xs md:text-sm">${cat.title}</td></tr>`;
                 tbody.insertAdjacentHTML('beforeend', catRow);
 
                 if (cat.items) {
                     cat.items.forEach((item, index) => {
                         const uniqueKey = `${cat.id}_${index}`;
-                        // Mặc định tích chọn (checked) nếu là dữ liệu mới (isNew = true), vì excel đa số là "Có"
-                        // Nếu không phải mới, dùng dữ liệu từ DB (rowData.checked)
                         const defaultCheck = isNew ? true : false;
                         renderRow(tbody, uniqueKey, index + 1, item, data[uniqueKey], defaultCheck);
                     });
@@ -222,7 +215,7 @@
 
                 if (cat.subsections) {
                     cat.subsections.forEach((sub, subIndex) => {
-                        const subRow = `<tr class="bg-gray-50 text-gray-700 italic font-semibold"><td colspan="5" class="py-2 px-4 pl-8">${sub.title}</td></tr>`;
+                        const subRow = `<tr class="block md:table-row bg-gray-50 border-b md:border-none"><td colspan="5" class="py-1 px-3 pl-6 text-gray-700 font-bold italic text-xs">${sub.title}</td></tr>`;
                         tbody.insertAdjacentHTML('beforeend', subRow);
                         sub.items.forEach((item, itemIndex) => {
                             const uniqueKey = `${cat.id}_${subIndex}_${itemIndex}`;
@@ -235,41 +228,59 @@
         }
 
         function renderRow(tbody, key, stt, name, rowData = {}, defaultCheck = false) {
-            // Determine checked state: if rowData exists, use it. If not, use defaultCheck (for new records)
             const isChecked = (rowData.hasFile !== undefined) ? rowData.hasFile : defaultCheck;
             const checkedAttr = isChecked ? 'checked' : '';
-            const rowClass = isChecked ? 'bg-white' : 'bg-gray-50 opacity-70'; // Dim unchecked rows slightly
-            
+            // Màu nền: Nếu checked thì trắng, không thì xám mờ
+            const rowClass = isChecked ? 'bg-white opacity-100' : 'bg-gray-100 opacity-60'; 
+
             const noteVal = rowData.note || '';
             const imageUrl = rowData.imageUrl || '';
 
             let imageHtml = '';
             if (imageUrl) {
                 imageHtml = `
-                    <div class="flex items-center space-x-2">
-                        <a href="${imageUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 underline text-xs truncate max-w-[100px]">Xem ảnh</a>
-                        <button onclick="triggerUpload('${key}')" class="text-gray-500 hover:text-yellow-600" title="Thay đổi ảnh"><i class="fas fa-edit"></i></button>
+                    <div class="flex items-center mt-2 md:mt-0">
+                        <a href="${imageUrl}" target="_blank" class="flex items-center text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200 mr-2">
+                            <i class="fas fa-image mr-1"></i> <span class="text-xs">Xem</span>
+                        </a>
+                        <button onclick="triggerUpload('${key}')" class="text-gray-400 p-1"><i class="fas fa-pen text-xs"></i></button>
                     </div>
                 `;
             } else {
                 imageHtml = `
-                    <button onclick="triggerUpload('${key}')" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs flex items-center transition">
-                        <i class="fas fa-cloud-upload-alt mr-1"></i> Upload
+                    <button onclick="triggerUpload('${key}')" class="w-full md:w-auto mt-2 md:mt-0 bg-white border border-dashed border-gray-400 text-gray-500 hover:text-blue-500 hover:border-blue-500 px-3 py-1 rounded text-xs flex items-center justify-center transition">
+                        <i class="fas fa-cloud-upload-alt mr-1"></i> Ảnh
                     </button>
                 `;
             }
 
+            // HTML Structure:
+            // Mobile: Card layout (flex-col). Desktop: Table layout.
             const row = `
-                <tr class="border-b border-gray-100 hover:bg-blue-50 transition duration-150 ${rowClass}" id="row-${key}">
-                    <td class="py-2 px-4 text-center text-gray-500">${stt}</td>
-                    <td class="py-2 px-4 font-medium text-gray-800">${name}</td>
-                    <td class="py-2 px-4 text-center">
-                        <input type="checkbox" data-key="${key}_hasFile" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 transition duration-150 ease-in-out cursor-pointer" ${checkedAttr} onchange="toggleRowStyle(this, '${key}')">
+                <tr class="block md:table-row mb-3 md:mb-0 rounded-lg shadow-sm md:shadow-none border md:border-b border-gray-200 ${rowClass} transition-all duration-200" id="row-${key}">
+                    
+                    <td class="block md:table-cell p-3 md:py-2 md:px-4 md:border-none border-b border-gray-100">
+                        <div class="flex justify-between items-start md:hidden mb-1">
+                            <span class="font-bold text-gray-800 text-sm w-5/6">${stt}. ${name}</span>
+                        </div>
+                        <span class="hidden md:block font-medium text-gray-800">${name}</span>
+                        <span class="hidden md:block text-gray-400 text-xs text-center">${stt}</span>
                     </td>
-                    <td class="py-2 px-4">
-                        <input type="text" data-key="${key}_note" class="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500 text-sm transition" placeholder="Nhập số lượng/ghi chú..." value="${noteVal}">
+
+                    <td class="block md:table-cell p-2 md:py-2 md:px-4 text-center md:align-middle">
+                        <div class="flex items-center justify-between md:justify-center">
+                            <span class="md:hidden text-xs font-bold text-gray-500 uppercase">Có hồ sơ?</span>
+                            <label class="inline-flex items-center p-2 bg-gray-50 rounded md:bg-transparent">
+                                <input type="checkbox" data-key="${key}_hasFile" class="form-checkbox text-blue-600 rounded focus:ring-blue-500" ${checkedAttr} onchange="toggleRowStyle(this, '${key}')">
+                            </label>
+                        </div>
                     </td>
-                    <td class="py-2 px-4">
+
+                    <td class="block md:table-cell p-2 md:py-2 md:px-4">
+                        <input type="text" data-key="${key}_note" class="w-full border border-gray-300 bg-white rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition" placeholder="Ghi chú..." value="${noteVal}">
+                    </td>
+
+                    <td class="block md:table-cell p-2 md:py-2 md:px-4">
                         <div id="img-container-${key}">
                             ${imageHtml}
                         </div>
@@ -280,23 +291,20 @@
             tbody.insertAdjacentHTML('beforeend', row);
         }
 
-        // --- INTERACTION ---
-
         window.toggleRowStyle = (checkbox, key) => {
             const row = document.getElementById(`row-${key}`);
             if (checkbox.checked) {
-                row.classList.remove('bg-gray-50', 'opacity-70');
-                row.classList.add('bg-white');
+                row.classList.remove('bg-gray-100', 'opacity-60');
+                row.classList.add('bg-white', 'opacity-100');
             } else {
-                row.classList.add('bg-gray-50', 'opacity-70');
-                row.classList.remove('bg-white');
+                row.classList.add('bg-gray-100', 'opacity-60');
+                row.classList.remove('bg-white', 'opacity-100');
             }
         };
 
-        // --- UPLOAD LOGIC (Firebase Storage) ---
         window.triggerUpload = (key) => {
             if (!currentRouteCode) {
-                showToast("Vui lòng chọn tuyến đường dây trước khi upload!", "error");
+                showToast("Vui lòng chọn tuyến đường dây trước!", "error");
                 return;
             }
             currentUploadBtn = key;
@@ -310,50 +318,49 @@
             const key = currentUploadBtn;
             const container = document.getElementById(`img-container-${key}`);
             
-            // Show loading in the button area
-            container.innerHTML = `<span class="text-blue-500 text-xs"><i class="fas fa-spinner fa-spin"></i> Đang tải lên...</span>`;
+            container.innerHTML = `<div class="flex items-center text-blue-500 bg-blue-50 p-1 rounded animate-pulse"><i class="fas fa-spinner fa-spin mr-1"></i><span class="text-xs">Đang tải...</span></div>`;
 
             try {
-                // Path: images/{routeCode}/{key_timestamp_filename}
                 const filename = `${key}_${Date.now()}_${file.name}`;
                 const storageRef = sRef(storage, `images/${currentRouteCode}/${filename}`);
                 
                 await uploadBytes(storageRef, file);
                 const downloadURL = await getDownloadURL(storageRef);
 
-                // Update UI
                 const inputHidden = document.querySelector(`input[data-key="${key}_imageUrl"]`);
                 inputHidden.value = downloadURL;
 
                 container.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                         <a href="${downloadURL}" target="_blank" class="text-blue-600 hover:text-blue-800 underline text-xs font-bold"><i class="fas fa-image"></i> Đã lưu ảnh</a>
-                         <button onclick="triggerUpload('${key}')" class="text-gray-400 hover:text-blue-600" title="Sửa"><i class="fas fa-pen"></i></button>
+                    <div class="flex items-center mt-2 md:mt-0">
+                        <a href="${downloadURL}" target="_blank" class="flex items-center text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200 mr-2 font-bold">
+                            <i class="fas fa-check mr-1"></i> <span class="text-xs">Xong</span>
+                        </a>
+                        <button onclick="triggerUpload('${key}')" class="text-gray-400 p-1"><i class="fas fa-pen text-xs"></i></button>
                     </div>
                 `;
                 
-                // Auto save after upload to prevent data loss
+                // Auto save
                 saveData(true); 
 
             } catch (error) {
                 console.error("Upload failed", error);
-                showToast("Lỗi upload: " + error.message, "error");
-                container.innerHTML = `
-                    <button onclick="triggerUpload('${key}')" class="text-red-500 text-xs">
-                        <i class="fas fa-exclamation-circle"></i> Thử lại
-                    </button>
-                `;
+                showToast("Lỗi: " + error.message, "error");
+                container.innerHTML = `<button onclick="triggerUpload('${key}')" class="text-red-500 text-xs"><i class="fas fa-exclamation-triangle"></i> Lỗi</button>`;
             }
-            // Reset input
             event.target.value = '';
         }
 
-        // --- FIREBASE DB OPERATIONS ---
-
         window.saveData = (silent = false) => {
             if (!currentRouteCode) {
-                showToast("Vui lòng chọn tuyến đường dây!", "error");
+                showToast("Chưa chọn hồ sơ!", "error");
                 return;
+            }
+
+            // Hiệu ứng nút save khi bấm
+            if(!silent) {
+                const btn = document.querySelector('button[onclick="saveData()"]');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-save"></i>', 1000);
             }
 
             const inputs = document.querySelectorAll('[data-key]');
@@ -361,7 +368,7 @@
 
             inputs.forEach(input => {
                 const parts = input.dataset.key.split('_');
-                const field = parts.pop(); // hasFile, note, imageUrl
+                const field = parts.pop();
                 const itemKey = parts.join('_');
 
                 if (!dataToSave[itemKey]) dataToSave[itemKey] = {};
@@ -378,10 +385,10 @@
             const dbRef = ref(db, 'records/' + currentRouteCode);
             set(dbRef, dataToSave)
                 .then(() => {
-                    if(!silent) showToast("Đã lưu dữ liệu thành công!", "success");
+                    if(!silent) showToast("Đã lưu thành công!", "success");
                 })
                 .catch((error) => {
-                    showToast("Lỗi khi lưu: " + error.message, "error");
+                    showToast("Lỗi: " + error.message, "error");
                 });
         };
 
@@ -391,17 +398,16 @@
 
             const loader = document.getElementById('loading');
             loader.classList.remove('hidden');
-            document.getElementById('tableBody').innerHTML = ''; // Clear old data
+            document.getElementById('tableBody').innerHTML = ''; 
 
             const dbRef = ref(db);
             get(child(dbRef, `records/${routeCode}`)).then((snapshot) => {
                 if (snapshot.exists()) {
-                    renderTable(snapshot.val(), false); // false = not new, respect DB values
-                    showToast("Đã tải dữ liệu đã lưu.", "info");
+                    renderTable(snapshot.val(), false);
+                    showToast("Đã tải dữ liệu.", "info");
                 } else {
-                    // Nếu chưa có dữ liệu, coi là MỚI -> dùng isNew = true để tự động tích chọn các mục mặc định
                     renderTable({}, true); 
-                    showToast("Chưa có dữ liệu. Đã tự động tích chọn mặc định theo Excel.", "success");
+                    showToast("Dữ liệu mới (Tự động điền).", "success");
                 }
             }).catch((error) => {
                 console.error(error);
@@ -413,31 +419,19 @@
 
         function showToast(message, type = "info") {
             const toast = document.getElementById('toast');
-            toast.innerHTML = '';
             
-            let icon = '';
-            let bgClass = '';
+            let bgClass = 'bg-gray-800 text-white';
+            if (type === 'error') bgClass = 'bg-red-600 text-white';
+            if (type === 'success') bgClass = 'bg-green-600 text-white';
 
-            if (type === 'error') {
-                bgClass = 'bg-red-600 text-white';
-                icon = '<i class="fas fa-times-circle mr-2"></i>';
-            } else if (type === 'success') {
-                bgClass = 'bg-green-600 text-white';
-                icon = '<i class="fas fa-check-circle mr-2"></i>';
-            } else {
-                bgClass = 'bg-gray-800 text-white';
-                icon = '<i class="fas fa-info-circle mr-2"></i>';
-            }
-
-            toast.className = `fixed bottom-5 right-5 px-6 py-4 rounded-lg shadow-xl transform translate-y-0 transition-all duration-300 z-50 flex items-center font-medium ${bgClass}`;
-            toast.innerHTML = icon + message;
+            toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 px-4 py-3 rounded-lg shadow-xl transition-all duration-300 z-[60] flex items-center font-medium opacity-100 min-w-[200px] justify-center text-sm ${bgClass}`;
+            toast.innerHTML = message;
             
             setTimeout(() => {
-                toast.classList.add('translate-y-24');
-            }, 3000);
+                toast.classList.replace('opacity-100', 'opacity-0');
+            }, 2500);
         }
 
-        // Start App
         initApp();
     </script>
 </body>
