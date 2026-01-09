@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Hồ Sơ QLKT & QLVH - Version 1.0</title>
+    <title>Quản Lý Hồ Sơ QLKT & QLVH - Version 1.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -16,71 +16,88 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Custom checkbox size */
+        input[type=checkbox] {
+            transform: scale(1.5);
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen text-sm">
 
-    <div class="container mx-auto p-4 max-w-6xl">
+    <div class="container mx-auto p-4 max-w-full lg:max-w-7xl">
         
-        <header class="bg-blue-700 text-white p-4 rounded-t-lg shadow-md flex justify-between items-center">
+        <header class="bg-blue-800 text-white p-4 rounded-t-lg shadow-md flex justify-between items-center sticky top-0 z-50">
             <div>
-                <h1 class="text-xl font-bold uppercase"><i class="fas fa-folder-open mr-2"></i>Quản Lý Hồ Sơ QLKT, QLVH TỔ 2</h1>
-                <p class="text-blue-200 text-xs mt-1">Version 1.0 - Firebase Connected</p>
+                <h1 class="text-xl font-bold uppercase"><i class="fas fa-tasks mr-2"></i>Quản Lý Hồ Sơ QLKT, QLVH TỔ 2</h1>
+                <p class="text-blue-200 text-xs mt-1">Version 1.1 - Checkbox & Image Upload Support</p>
             </div>
-            <div id="status-indicator" class="flex items-center space-x-2">
-                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                <span class="text-xs">Chưa kết nối</span>
+            <div id="status-indicator" class="flex items-center space-x-2 bg-blue-900 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                <span class="text-xs">Đang kết nối...</span>
             </div>
         </header>
 
-        <div class="bg-white p-4 shadow-md mb-4 border-b border-gray-200 flex flex-wrap gap-4 items-end">
-            <div class="w-full md:w-1/3">
-                <label class="block text-gray-700 font-bold mb-2">Chọn Tuyến Đường Dây / Trạm:</label>
-                <select id="routeSelect" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
-                    <option value="" disabled selected>-- Chọn hồ sơ --</option>
-                    </select>
-            </div>
-            
-            <div class="flex space-x-2">
-                <button onclick="loadData()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow transition">
-                    <i class="fas fa-sync-alt mr-1"></i> Tải dữ liệu
-                </button>
-                <button onclick="saveData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition">
-                    <i class="fas fa-save mr-1"></i> Lưu thay đổi
-                </button>
+        <div class="bg-white p-4 shadow-md mb-4 border-b border-gray-200 sticky top-20 z-40">
+            <div class="flex flex-wrap gap-4 items-end justify-between">
+                <div class="w-full md:w-1/3">
+                    <label class="block text-gray-700 font-bold mb-2 text-xs uppercase tracking-wide">Chọn Tuyến Đường Dây / Trạm:</label>
+                    <div class="relative">
+                        <select id="routeSelect" class="block appearance-none w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500">
+                            <option value="" disabled selected>-- Vui lòng chọn hồ sơ --</option>
+                            </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button onclick="loadData()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition flex items-center">
+                        <i class="fas fa-sync-alt mr-2"></i> Tải lại
+                    </button>
+                    <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition flex items-center font-bold">
+                        <i class="fas fa-save mr-2"></i> LƯU DỮ LIỆU
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="bg-white shadow-lg rounded-b-lg overflow-hidden">
-            <div id="loading" class="hidden flex justify-center items-center p-10">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+        <div class="bg-white shadow-lg rounded-b-lg overflow-hidden min-h-[500px]">
+            <div id="loading" class="hidden flex justify-center items-center p-20">
+                <div class="flex flex-col items-center">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+                    <span class="text-gray-500">Đang tải dữ liệu...</span>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full leading-normal">
                     <thead>
-                        <tr class="bg-gray-200 text-gray-600 uppercase text-xs leading-normal">
-                            <th class="py-3 px-6 text-left w-12">STT</th>
-                            <th class="py-3 px-6 text-left">Danh Mục Hồ Sơ</th>
-                            <th class="py-3 px-6 text-center w-32">Trạng thái (Có/Số lượng)</th>
-                            <th class="py-3 px-6 text-center w-32">Thiếu</th>
-                            <th class="py-3 px-6 text-left">Ghi chú</th>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal border-b-2 border-gray-200">
+                            <th class="py-3 px-4 text-center w-10">STT</th>
+                            <th class="py-3 px-4 text-left">Danh Mục Hồ Sơ</th>
+                            <th class="py-3 px-4 text-center w-24" title="Tích chọn nếu Có">Có</th>
+                            <th class="py-3 px-4 text-left w-48">Số lượng / Ghi chú</th>
+                            <th class="py-3 px-4 text-left w-64">Hình ảnh minh chứng</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="text-gray-600 text-sm font-light">
+                    <tbody id="tableBody" class="text-gray-700 text-sm">
                         </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg transform translate-y-20 transition-transform duration-300 opacity-0">
-        Thông báo
+    <div id="toast" class="fixed bottom-5 right-5 px-6 py-4 rounded-lg shadow-xl transform translate-y-24 transition-all duration-300 z-50 flex items-center font-medium">
+        <span>Thông báo</span>
     </div>
+
+    <input type="file" id="globalFileInput" class="hidden" accept="image/*">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         // --- USER CONFIGURATION ---
         const firebaseConfig = { 
@@ -95,92 +112,44 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const storage = getStorage(app);
 
         // --- DATA DEFINITIONS ---
-        // Danh sách các tuyến dựa trên tên file đã upload
+        // Danh sách các tuyến từ file Excel
         const routes = [
-            "AK_VT (An Khánh - Việt Thành)",
-            "BL-HX (Bình Lợi - Hỏa Xa)",
-            "BT_TDA (Bình Triệu - Thanh Đa)",
-            "BT_HBP (Bình Thái - Hiệp Bình Phước)",
-            "BT_HX (Bình Triệu - Hỏa Xa)",
-            "CL-TDD (Cát Lái - Thủ Đức Đông)",
-            "CL-PH (Cát Lái - Phú Hữu)",
-            "CL-SM (Cát Lái - Sao Mai)",
-            "NR Intel (Nhánh rẽ Intel)",
-            "CNC-IT (Công Nghệ Cao - Intel)",
-            "CL-CNC (Cát Lái - Công Nghệ Cao)",
-            "CNC-TNP (Công Nghệ Cao - Tăng Nhơn Phú)",
-            "HBP-HX (Hiệp Bình Phước - Hỏa Xa)",
-            "HBP-BT (Hiệp Bình Phước - Bình Triệu)",
-            "HBP-TL (Hiệp Bình Phước - Thạnh Lộc)",
-            "HBP-BL (Hiệp Bình Phước - Bình Lợi)",
-            "HX-HH (Hỏa Xa - Hòa Hưng)",
-            "HX-TSN (Hỏa Xa - Tân Sơn Nhất)",
-            "HM-TL (Hóc Môn - Thạnh Lộc)",
-            "HM-HBP (Hóc Môn - Hiệp Bình Phước)",
-            "HM-HX (Hóc Môn - Hỏa Xa)",
-            "LT1-ĐH (Linh Trung 1 - Đông Hòa)",
-            "NMN TĐ-LT1 (NMN Thủ Đức - Linh Trung 1)",
-            "TNP-IT (Tăng Nhơn Phú - Intel)",
-            "TC-TĐ (Tân Cảng 2 - Thảo Điền)",
-            "TC-XL (Tân Cảng 2 - Xa Lộ)",
-            "TC-AK (Tân Cảng 2 - An Khánh)",
-            "TĐ-AK-VT (Thủ Đức - An Khánh - Việt Thành)",
-            "TH-ĐT (Tân Hiệp - Đông Thạnh)",
-            "TĐ-LT2 (Thủ Đức - Linh Trung 2)",
-            "TĐ-BT (Thủ Đức - Bình Thái)",
-            "TĐ-TDA (Thủ Đức - Thanh Đa)",
-            "TĐ-NMĐ (Thủ Đức - NMĐ Thủ Đức)",
-            "TĐ-VKC-TC (Thủ Đức - Vikimco - Tân Cảng)",
-            "TĐ-TDIEN (Thủ Đức - Thảo Điền)",
-            "NR IT (Nhánh rẽ Intel 176-7)",
-            "TĐ-TĐB-IT (Thủ Đức - TĐ Bắc - Intel)",
-            "TĐ-NMN TĐ (Thủ Đức - NMN Thủ Đức)",
-            "TĐB-BA (Thủ Đức Bắc - Bình An)",
-            "TA-LT2 (Thuận An - Linh Trung 2)",
-            "XL-TC (Xa Lộ - Tân Cảng)",
-            "XL-HX (Xa Lộ - Hỏa Xa)",
-            "XL-ĐK (Xa Lộ - Đa Kao)",
-            "CB-TQ (Cầu Bông - Tân Quy)",
-            "CB-CC_CB-ĐH (Cầu Bông - Củ Chi/Đức Hòa)",
-            "CB-TPT (Cầu Bông - Tân Phú Trung)",
-            "CB-TH (Cầu Bông - Tân Hiệp)",
-            "ĐT-TH (Đông Thạnh - Tân Hiệp)",
-            "CB-ĐN (Cầu Bông - Đông Nam)",
-            "NR ĐNAM (Nhánh rẽ Đông Nam)",
-            "CC-KCNTB (Củ Chi 2 - KCN Trảng Bàng)",
-            "CC-CC2 (Củ Chi 2 - Củ Chi)",
-            "CC-PHĐ (Củ Chi 2 - Phú Hòa Đông)",
-            "CC-BĐ (Củ Chi 2 - Bàu Đưng)",
-            "HM-ĐT (Hóc Môn - Đông Thạnh)",
-            "HM-ĐN (Hóc Môn - Đông Nam)",
-            "PHĐ-TQ-TĐ (Phú Hòa Đông - Tân Quy - Tân Định)",
+            "AK_VT (An Khánh - Việt Thành)", "BL-HX (Bình Lợi - Hỏa Xa)", "BT_TDA (Bình Triệu - Thanh Đa)",
+            "BT_HBP (Bình Thái - Hiệp Bình Phước)", "BT_HX (Bình Triệu - Hỏa Xa)", "CL-TDD (Cát Lái - Thủ Đức Đông)",
+            "CL-PH (Cát Lái - Phú Hữu)", "CL-SM (Cát Lái - Sao Mai)", "NR Intel (Nhánh rẽ Intel)",
+            "CNC-IT (Công Nghệ Cao - Intel)", "CL-CNC (Cát Lái - Công Nghệ Cao)", "CNC-TNP (Công Nghệ Cao - Tăng Nhơn Phú)",
+            "HBP-HX (Hiệp Bình Phước - Hỏa Xa)", "HBP-BT (Hiệp Bình Phước - Bình Triệu)", "HBP-TL (Hiệp Bình Phước - Thạnh Lộc)",
+            "HBP-BL (Hiệp Bình Phước - Bình Lợi)", "HX-HH (Hỏa Xa - Hòa Hưng)", "HX-TSN (Hỏa Xa - Tân Sơn Nhất)",
+            "HM-TL (Hóc Môn - Thạnh Lộc)", "HM-HBP (Hóc Môn - Hiệp Bình Phước)", "HM-HX (Hóc Môn - Hỏa Xa)",
+            "LT1-ĐH (Linh Trung 1 - Đông Hòa)", "NMN TĐ-LT1 (NMN Thủ Đức - Linh Trung 1)", "TNP-IT (Tăng Nhơn Phú - Intel)",
+            "TC-TĐ (Tân Cảng 2 - Thảo Điền)", "TC-XL (Tân Cảng 2 - Xa Lộ)", "TC-AK (Tân Cảng 2 - An Khánh)",
+            "TĐ-AK-VT (Thủ Đức - An Khánh - Việt Thành)", "TH-ĐT (Tân Hiệp - Đông Thạnh)", "TĐ-LT2 (Thủ Đức - Linh Trung 2)",
+            "TĐ-BT (Thủ Đức - Bình Thái)", "TĐ-TDA (Thủ Đức - Thanh Đa)", "TĐ-NMĐ (Thủ Đức - NMĐ Thủ Đức)",
+            "TĐ-VKC-TC (Thủ Đức - Vikimco - Tân Cảng)", "TĐ-TDIEN (Thủ Đức - Thảo Điền)", "NR IT (Nhánh rẽ Intel 176-7)",
+            "TĐ-TĐB-IT (Thủ Đức - TĐ Bắc - Intel)", "TĐ-NMN TĐ (Thủ Đức - NMN Thủ Đức)", "TĐB-BA (Thủ Đức Bắc - Bình An)",
+            "TA-LT2 (Thuận An - Linh Trung 2)", "XL-TC (Xa Lộ - Tân Cảng)", "XL-HX (Xa Lộ - Hỏa Xa)",
+            "XL-ĐK (Xa Lộ - Đa Kao)", "CB-TQ (Cầu Bông - Tân Quy)", "CB-CC_CB-ĐH (Cầu Bông - Củ Chi/Đức Hòa)",
+            "CB-TPT (Cầu Bông - Tân Phú Trung)", "CB-TH (Cầu Bông - Tân Hiệp)", "ĐT-TH (Đông Thạnh - Tân Hiệp)",
+            "CB-ĐN (Cầu Bông - Đông Nam)", "NR ĐNAM (Nhánh rẽ Đông Nam)", "CC-KCNTB (Củ Chi 2 - KCN Trảng Bàng)",
+            "CC-CC2 (Củ Chi 2 - Củ Chi)", "CC-PHĐ (Củ Chi 2 - Phú Hòa Đông)", "CC-BĐ (Củ Chi 2 - Bàu Đưng)",
+            "HM-ĐT (Hóc Môn - Đông Thạnh)", "HM-ĐN (Hóc Môn - Đông Nam)", "PHĐ-TQ-TĐ (Phú Hòa Đông - Tân Quy - Tân Định)",
             "PHĐ-TĐ (Phú Hòa Đông - Tân Định)"
         ];
 
-        // Cấu trúc hồ sơ chuẩn (Template)
+        // Cấu trúc hồ sơ chuẩn
         const categories = [
             {
                 id: "A", title: "A. HSQLVH (Hồ sơ quản lý vận hành)", 
                 items: [
-                    "Thông số kỹ thuật ĐZ",
-                    "Bảng theo dõi đóng cắt",
-                    "Bảng Theo dõi Sự cố",
-                    "Bảng theo dõi Phụ tải",
-                    "Bảng Theo dõi kỹ thuật hành lang",
-                    "Bảng theo dõi công tác đại tu",
-                    "Bảng tổng hợp tồn tại",
-                    "Bảng phân bố cột",
-                    "Bảng giao chéo",
-                    "Bảng đo độ võng (khi có thay đổi)",
-                    "Bảng báo cáo nhiệt độ (6 tháng/1 lần)",
-                    "Bảng báo cáo điện trở (1 năm/1 lần)",
-                    "Hồ sơ thứ tự pha (khi có thay đổi)",
-                    "Hình Ảnh trụ",
-                    "Biên bản KTĐK ngày (1 tháng/1 lần)",
-                    "Biên bản KTĐK đêm (3 tháng/1 lần)",
-                    "Hồ sơ theo dõi nhà / công trình"
+                    "Thông số kỹ thuật ĐZ", "Bảng theo dõi đóng cắt", "Bảng Theo dõi Sự cố", "Bảng theo dõi Phụ tải",
+                    "Bảng Theo dõi kỹ thuật hành lang", "Bảng theo dõi công tác đại tu", "Bảng tổng hợp tồn tại",
+                    "Bảng phân bố cột", "Bảng giao chéo", "Bảng đo độ võng (khi có thay đổi)",
+                    "Bảng báo cáo nhiệt độ (6 tháng/1 lần)", "Bảng báo cáo điện trở (1 năm/1 lần)",
+                    "Hồ sơ thứ tự pha (khi có thay đổi)", "Hình Ảnh trụ", "Biên bản KTĐK ngày (1 tháng/1 lần)",
+                    "Biên bản KTĐK đêm (3 tháng/1 lần)", "Hồ sơ theo dõi nhà / công trình"
                 ]
             },
             {
@@ -188,141 +157,230 @@
                 subsections: [
                     {
                         title: "I. Hồ sơ thiết kế được duyệt",
-                        items: [
-                            "Hồ sơ móng trụ",
-                            "Hồ sơ đền bù",
-                            "Hồ sơ nghiệm thu",
-                            "Hồ sơ thiết kế",
-                            "Hồ sơ dự thầu"
-                        ]
+                        items: ["Hồ sơ móng trụ", "Hồ sơ đền bù", "Hồ sơ nghiệm thu", "Hồ sơ thiết kế", "Hồ sơ dự thầu"]
                     },
                     {
                         title: "II. Hồ sơ hoàn công",
-                        items: [
-                            "Hồ sơ hoàn công phần móng trụ",
-                            "Hồ sơ hoàn công phần trụ",
-                            "Hồ sơ hoàn công phần dây dẫn, dây chống sét",
-                            "Hồ sơ hoàn công phần tiếp địa",
-                            "Biên bản nghiệm thu",
-                            "Tài liệu của nhà chế tạo"
-                        ]
+                        items: ["Hồ sơ hoàn công phần móng trụ", "Hồ sơ hoàn công phần trụ", "Hồ sơ hoàn công phần dây dẫn, dây chống sét",
+                                "Hồ sơ hoàn công phần tiếp địa", "Biên bản nghiệm thu", "Tài liệu của nhà chế tạo"]
                     }
                 ]
             }
         ];
 
-        // --- UI FUNCTIONS ---
+        // --- APP STATE ---
+        let currentUploadBtn = null; // Track which button triggered upload
+        let currentRouteCode = null;
 
+        // --- UI FUNCTIONS ---
         function initApp() {
-            // Update status
             const statusIndicator = document.getElementById('status-indicator');
             if(db) {
-                statusIndicator.innerHTML = '<span class="w-3 h-3 bg-green-500 rounded-full"></span><span class="text-xs text-green-700 font-bold">Đã kết nối Firebase</span>';
+                statusIndicator.innerHTML = '<i class="fas fa-check-circle text-green-400 mr-1"></i><span class="text-xs text-green-200 font-bold">Đã kết nối Firebase</span>';
+                statusIndicator.classList.remove('bg-blue-900');
+                statusIndicator.classList.add('bg-green-800');
             }
 
-            // Populate Route Dropdown
             const select = document.getElementById('routeSelect');
             routes.forEach(route => {
                 const opt = document.createElement('option');
-                // Use the code (part before space) as key for DB, full string for display
                 const code = route.split(' ')[0].replace(/[^a-zA-Z0-9-_]/g, '_'); 
                 opt.value = code;
                 opt.textContent = route;
                 select.appendChild(opt);
             });
 
-            // Trigger load when route changes
-            select.addEventListener('change', () => {
+            select.addEventListener('change', (e) => {
+                currentRouteCode = e.target.value;
                 loadData();
             });
 
-            // Render empty table initially
+            // Handle global file input change
+            document.getElementById('globalFileInput').addEventListener('change', handleFileSelect);
+
             renderTable({});
         }
 
-        window.renderTable = (data) => {
+        window.renderTable = (data, isNew = false) => {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
             categories.forEach(cat => {
-                // Render Category Header
-                const catRow = `<tr class="bg-blue-100 font-bold text-blue-800"><td colspan="5" class="py-2 px-6">${cat.title}</td></tr>`;
+                // Category Header
+                const catRow = `<tr class="bg-blue-50 text-blue-800 font-bold"><td colspan="5" class="py-3 px-4">${cat.title}</td></tr>`;
                 tbody.insertAdjacentHTML('beforeend', catRow);
 
                 if (cat.items) {
                     cat.items.forEach((item, index) => {
-                        renderRow(tbody, cat.id, index + 1, item, data[`${cat.id}_${index}`]);
+                        const uniqueKey = `${cat.id}_${index}`;
+                        // Mặc định tích chọn (checked) nếu là dữ liệu mới (isNew = true), vì excel đa số là "Có"
+                        // Nếu không phải mới, dùng dữ liệu từ DB (rowData.checked)
+                        const defaultCheck = isNew ? true : false;
+                        renderRow(tbody, uniqueKey, index + 1, item, data[uniqueKey], defaultCheck);
                     });
                 }
 
                 if (cat.subsections) {
                     cat.subsections.forEach((sub, subIndex) => {
-                        const subRow = `<tr class="bg-gray-50 font-semibold text-gray-700"><td colspan="5" class="py-1 px-6 pl-10">${sub.title}</td></tr>`;
+                        const subRow = `<tr class="bg-gray-50 text-gray-700 italic font-semibold"><td colspan="5" class="py-2 px-4 pl-8">${sub.title}</td></tr>`;
                         tbody.insertAdjacentHTML('beforeend', subRow);
                         sub.items.forEach((item, itemIndex) => {
-                            // Unique ID construction: CatID_SubIndex_ItemIndex
                             const uniqueKey = `${cat.id}_${subIndex}_${itemIndex}`;
-                            renderRow(tbody, uniqueKey, itemIndex + 1, item, data[uniqueKey]);
+                            const defaultCheck = isNew ? true : false;
+                            renderRow(tbody, uniqueKey, itemIndex + 1, item, data[uniqueKey], defaultCheck);
                         });
                     });
                 }
             });
         }
 
-        function renderRow(tbody, idPrefix, stt, name, rowData = {}) {
-            const countVal = rowData.count || '';
-            const missingVal = rowData.missing || '';
+        function renderRow(tbody, key, stt, name, rowData = {}, defaultCheck = false) {
+            // Determine checked state: if rowData exists, use it. If not, use defaultCheck (for new records)
+            const isChecked = (rowData.hasFile !== undefined) ? rowData.hasFile : defaultCheck;
+            const checkedAttr = isChecked ? 'checked' : '';
+            const rowClass = isChecked ? 'bg-white' : 'bg-gray-50 opacity-70'; // Dim unchecked rows slightly
+            
             const noteVal = rowData.note || '';
+            const imageUrl = rowData.imageUrl || '';
+
+            let imageHtml = '';
+            if (imageUrl) {
+                imageHtml = `
+                    <div class="flex items-center space-x-2">
+                        <a href="${imageUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 underline text-xs truncate max-w-[100px]">Xem ảnh</a>
+                        <button onclick="triggerUpload('${key}')" class="text-gray-500 hover:text-yellow-600" title="Thay đổi ảnh"><i class="fas fa-edit"></i></button>
+                    </div>
+                `;
+            } else {
+                imageHtml = `
+                    <button onclick="triggerUpload('${key}')" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs flex items-center transition">
+                        <i class="fas fa-cloud-upload-alt mr-1"></i> Upload
+                    </button>
+                `;
+            }
 
             const row = `
-                <tr class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="py-2 px-6 text-left whitespace-nowrap">${stt}</td>
-                    <td class="py-2 px-6 text-left font-medium">${name}</td>
-                    <td class="py-2 px-6 text-center">
-                        <input type="text" data-key="${idPrefix}_count" class="w-full text-center border rounded p-1 focus:ring-2 focus:ring-blue-300" placeholder="Có/SL" value="${countVal}">
+                <tr class="border-b border-gray-100 hover:bg-blue-50 transition duration-150 ${rowClass}" id="row-${key}">
+                    <td class="py-2 px-4 text-center text-gray-500">${stt}</td>
+                    <td class="py-2 px-4 font-medium text-gray-800">${name}</td>
+                    <td class="py-2 px-4 text-center">
+                        <input type="checkbox" data-key="${key}_hasFile" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 transition duration-150 ease-in-out cursor-pointer" ${checkedAttr} onchange="toggleRowStyle(this, '${key}')">
                     </td>
-                    <td class="py-2 px-6 text-center">
-                        <input type="text" data-key="${idPrefix}_missing" class="w-full text-center border rounded p-1 focus:ring-2 focus:ring-red-300" placeholder="" value="${missingVal}">
+                    <td class="py-2 px-4">
+                        <input type="text" data-key="${key}_note" class="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500 text-sm transition" placeholder="Nhập số lượng/ghi chú..." value="${noteVal}">
                     </td>
-                    <td class="py-2 px-6 text-left">
-                        <input type="text" data-key="${idPrefix}_note" class="w-full border rounded p-1 focus:ring-2 focus:ring-blue-300" placeholder="..." value="${noteVal}">
+                    <td class="py-2 px-4">
+                        <div id="img-container-${key}">
+                            ${imageHtml}
+                        </div>
+                        <input type="hidden" data-key="${key}_imageUrl" value="${imageUrl}">
                     </td>
                 </tr>
             `;
             tbody.insertAdjacentHTML('beforeend', row);
         }
 
-        // --- FIREBASE OPERATIONS ---
+        // --- INTERACTION ---
 
-        window.saveData = () => {
-            const routeCode = document.getElementById('routeSelect').value;
-            if (!routeCode) {
-                showToast("Vui lòng chọn tuyến đường dây trước!", "error");
+        window.toggleRowStyle = (checkbox, key) => {
+            const row = document.getElementById(`row-${key}`);
+            if (checkbox.checked) {
+                row.classList.remove('bg-gray-50', 'opacity-70');
+                row.classList.add('bg-white');
+            } else {
+                row.classList.add('bg-gray-50', 'opacity-70');
+                row.classList.remove('bg-white');
+            }
+        };
+
+        // --- UPLOAD LOGIC (Firebase Storage) ---
+        window.triggerUpload = (key) => {
+            if (!currentRouteCode) {
+                showToast("Vui lòng chọn tuyến đường dây trước khi upload!", "error");
+                return;
+            }
+            currentUploadBtn = key;
+            document.getElementById('globalFileInput').click();
+        };
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file || !currentUploadBtn) return;
+
+            const key = currentUploadBtn;
+            const container = document.getElementById(`img-container-${key}`);
+            
+            // Show loading in the button area
+            container.innerHTML = `<span class="text-blue-500 text-xs"><i class="fas fa-spinner fa-spin"></i> Đang tải lên...</span>`;
+
+            try {
+                // Path: images/{routeCode}/{key_timestamp_filename}
+                const filename = `${key}_${Date.now()}_${file.name}`;
+                const storageRef = sRef(storage, `images/${currentRouteCode}/${filename}`);
+                
+                await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(storageRef);
+
+                // Update UI
+                const inputHidden = document.querySelector(`input[data-key="${key}_imageUrl"]`);
+                inputHidden.value = downloadURL;
+
+                container.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                         <a href="${downloadURL}" target="_blank" class="text-blue-600 hover:text-blue-800 underline text-xs font-bold"><i class="fas fa-image"></i> Đã lưu ảnh</a>
+                         <button onclick="triggerUpload('${key}')" class="text-gray-400 hover:text-blue-600" title="Sửa"><i class="fas fa-pen"></i></button>
+                    </div>
+                `;
+                
+                // Auto save after upload to prevent data loss
+                saveData(true); 
+
+            } catch (error) {
+                console.error("Upload failed", error);
+                showToast("Lỗi upload: " + error.message, "error");
+                container.innerHTML = `
+                    <button onclick="triggerUpload('${key}')" class="text-red-500 text-xs">
+                        <i class="fas fa-exclamation-circle"></i> Thử lại
+                    </button>
+                `;
+            }
+            // Reset input
+            event.target.value = '';
+        }
+
+        // --- FIREBASE DB OPERATIONS ---
+
+        window.saveData = (silent = false) => {
+            if (!currentRouteCode) {
+                showToast("Vui lòng chọn tuyến đường dây!", "error");
                 return;
             }
 
-            const inputs = document.querySelectorAll('input[data-key]');
+            const inputs = document.querySelectorAll('[data-key]');
             const dataToSave = {};
 
             inputs.forEach(input => {
                 const parts = input.dataset.key.split('_');
-                const field = parts.pop(); // count, missing, or note
+                const field = parts.pop(); // hasFile, note, imageUrl
                 const itemKey = parts.join('_');
 
                 if (!dataToSave[itemKey]) dataToSave[itemKey] = {};
-                dataToSave[itemKey][field] = input.value;
+
+                if (input.type === 'checkbox') {
+                    dataToSave[itemKey][field] = input.checked;
+                } else {
+                    dataToSave[itemKey][field] = input.value;
+                }
             });
 
-            // Metadata
             dataToSave.lastUpdated = new Date().toISOString();
 
-            const dbRef = ref(db, 'records/' + routeCode);
+            const dbRef = ref(db, 'records/' + currentRouteCode);
             set(dbRef, dataToSave)
                 .then(() => {
-                    showToast("Đã lưu dữ liệu thành công!", "success");
+                    if(!silent) showToast("Đã lưu dữ liệu thành công!", "success");
                 })
                 .catch((error) => {
-                    console.error(error);
                     showToast("Lỗi khi lưu: " + error.message, "error");
                 });
         };
@@ -333,15 +391,17 @@
 
             const loader = document.getElementById('loading');
             loader.classList.remove('hidden');
-            
+            document.getElementById('tableBody').innerHTML = ''; // Clear old data
+
             const dbRef = ref(db);
             get(child(dbRef, `records/${routeCode}`)).then((snapshot) => {
                 if (snapshot.exists()) {
-                    renderTable(snapshot.val());
-                    showToast("Đã tải dữ liệu.", "info");
+                    renderTable(snapshot.val(), false); // false = not new, respect DB values
+                    showToast("Đã tải dữ liệu đã lưu.", "info");
                 } else {
-                    renderTable({}); // Clear table for new entry
-                    showToast("Chưa có dữ liệu cho tuyến này. Mời nhập mới.", "info");
+                    // Nếu chưa có dữ liệu, coi là MỚI -> dùng isNew = true để tự động tích chọn các mục mặc định
+                    renderTable({}, true); 
+                    showToast("Chưa có dữ liệu. Đã tự động tích chọn mặc định theo Excel.", "success");
                 }
             }).catch((error) => {
                 console.error(error);
@@ -353,17 +413,27 @@
 
         function showToast(message, type = "info") {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            toast.innerHTML = '';
             
-            if (type === 'error') toast.className = "fixed bottom-5 right-5 bg-red-600 text-white px-4 py-2 rounded shadow-lg transform translate-y-0 transition-transform duration-300 z-50";
-            else if (type === 'success') toast.className = "fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg transform translate-y-0 transition-transform duration-300 z-50";
-            else toast.className = "fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg transform translate-y-0 transition-transform duration-300 z-50";
+            let icon = '';
+            let bgClass = '';
 
-            toast.style.opacity = "1";
+            if (type === 'error') {
+                bgClass = 'bg-red-600 text-white';
+                icon = '<i class="fas fa-times-circle mr-2"></i>';
+            } else if (type === 'success') {
+                bgClass = 'bg-green-600 text-white';
+                icon = '<i class="fas fa-check-circle mr-2"></i>';
+            } else {
+                bgClass = 'bg-gray-800 text-white';
+                icon = '<i class="fas fa-info-circle mr-2"></i>';
+            }
+
+            toast.className = `fixed bottom-5 right-5 px-6 py-4 rounded-lg shadow-xl transform translate-y-0 transition-all duration-300 z-50 flex items-center font-medium ${bgClass}`;
+            toast.innerHTML = icon + message;
             
             setTimeout(() => {
-                toast.style.opacity = "0";
-                toast.style.transform = "translateY(20px)";
+                toast.classList.add('translate-y-24');
             }, 3000);
         }
 
