@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quản Lý Hồ Sơ QLKT & QLVH - Version 1.2 (Mobile)</title>
+    <title>Quản Lý Hồ Sơ QLKT & QLVH - Version 1.3 (Auth)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Tùy chỉnh thanh cuộn cho đẹp hơn */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
         
         .loader {
             border-top-color: #3498db;
@@ -22,73 +20,88 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Checkbox to hơn cho mobile */
-        input[type=checkbox] {
-            transform: scale(1.6);
-            margin: 5px;
-        }
+        input[type=checkbox] { transform: scale(1.6); margin: 5px; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen text-sm pb-24"> <header class="bg-blue-800 text-white p-3 shadow-md flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center overflow-hidden">
-            <i class="fas fa-bolt text-yellow-400 mr-2 text-lg"></i>
-            <div>
-                <h1 class="font-bold uppercase text-sm md:text-lg truncate leading-tight">QL Hồ Sơ Tổ 2</h1>
-                <p class="text-blue-300 text-[10px] hidden md:block">Version 1.2 - Mobile Optimized</p>
-            </div>
-        </div>
-        <div id="status-indicator" class="flex items-center px-2 py-1 bg-blue-900 rounded-full ml-2 flex-shrink-0">
-            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1"></div>
-            <span class="text-[10px] font-bold">Kết nối...</span>
-        </div>
-    </header>
+<body class="bg-gray-100 min-h-screen text-sm pb-24 relative">
 
-    <div class="container mx-auto p-2 md:p-4 max-w-7xl">
-        
-        <div class="bg-white p-3 rounded-lg shadow-sm mb-4 border border-gray-200 sticky top-[50px] z-40">
-            <label class="block text-gray-500 text-[10px] font-bold uppercase mb-1">Chọn Tuyến / Trạm:</label>
-            <div class="flex gap-2">
-                <div class="relative w-full">
-                    <select id="routeSelect" class="block appearance-none w-full bg-gray-50 border border-gray-300 text-gray-800 py-2 px-3 pr-8 rounded focus:outline-none focus:border-blue-500 font-medium text-sm">
-                        <option value="" disabled selected>-- Chọn hồ sơ làm việc --</option>
-                        </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
-                <button onclick="loadData()" class="bg-gray-200 text-gray-600 px-3 rounded hover:bg-gray-300 transition flex-shrink-0" title="Tải lại">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
+    <div id="login-overlay" class="fixed inset-0 bg-blue-900 z-[100] flex flex-col items-center justify-center text-white">
+        <div class="mb-6 text-center">
+            <i class="fas fa-bolt text-5xl text-yellow-400 mb-4"></i>
+            <h1 class="text-3xl font-bold uppercase">Quản Lý Hồ Sơ Tổ 2</h1>
+            <p class="text-blue-300 mt-2">Vui lòng đăng nhập để tiếp tục</p>
         </div>
-
-        <div id="loading" class="hidden flex justify-center items-center p-10">
-            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10"></div>
-        </div>
-
-        <div class="bg-transparent md:bg-white md:shadow-lg md:rounded-lg overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead class="hidden md:table-header-group">
-                    <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal border-b-2 border-gray-200">
-                        <th class="py-3 px-4 text-center w-12">STT</th>
-                        <th class="py-3 px-4">Nội dung hồ sơ</th>
-                        <th class="py-3 px-4 text-center w-20">Có</th>
-                        <th class="py-3 px-4 w-1/3">Ghi chú / Số lượng</th>
-                        <th class="py-3 px-4 w-40">Hình ảnh</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody" class="block md:table-row-group">
-                    </tbody>
-            </table>
-        </div>
+        <button onclick="loginGoogle()" class="bg-white text-gray-800 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-gray-100 transition flex items-center gap-3 text-lg">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6 h-6">
+            Đăng nhập bằng Gmail
+        </button>
+        <p class="mt-8 text-xs text-blue-400">Version 1.3 - Secure Login & Audit Log</p>
     </div>
 
-    <button onclick="saveData()" class="fixed bottom-6 right-4 bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl z-50 hover:bg-blue-700 active:scale-95 transition-all duration-200 border-2 border-white">
-        <i class="fas fa-save"></i>
-    </button>
-    
-    <div class="fixed bottom-6 right-20 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-70 pointer-events-none hidden md:block">
-        Lưu dữ liệu
+    <div id="app-content" class="hidden">
+        
+        <header class="bg-blue-800 text-white p-3 shadow-md flex justify-between items-center sticky top-0 z-50">
+            <div class="flex items-center overflow-hidden">
+                <i class="fas fa-folder-open text-yellow-400 mr-2 text-lg"></i>
+                <div>
+                    <h1 class="font-bold uppercase text-sm md:text-lg truncate leading-tight">QL Hồ Sơ Tổ 2</h1>
+                    <div id="user-info" class="text-[10px] text-blue-200 flex items-center">
+                        </div>
+                </div>
+            </div>
+            <button onclick="logout()" class="text-xs bg-blue-900 hover:bg-red-600 px-3 py-1 rounded text-white transition ml-2 whitespace-nowrap">
+                <i class="fas fa-sign-out-alt"></i> Thoát
+            </button>
+        </header>
+
+        <div class="container mx-auto p-2 md:p-4 max-w-7xl">
+            
+            <div class="bg-white p-3 rounded-lg shadow-sm mb-4 border border-gray-200 sticky top-[50px] z-40">
+                <div class="flex justify-between items-end mb-2">
+                    <label class="block text-gray-500 text-[10px] font-bold uppercase">Chọn Tuyến / Trạm:</label>
+                    <div id="last-update-info" class="text-[10px] text-right italic text-gray-400">
+                        </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    <div class="relative w-full">
+                        <select id="routeSelect" class="block appearance-none w-full bg-gray-50 border border-gray-300 text-gray-800 py-2 px-3 pr-8 rounded focus:outline-none focus:border-blue-500 font-medium text-sm">
+                            <option value="" disabled selected>-- Chọn hồ sơ làm việc --</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <button onclick="loadData()" class="bg-gray-200 text-gray-600 px-3 rounded hover:bg-gray-300 transition flex-shrink-0" title="Tải lại">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="loading" class="hidden flex justify-center items-center p-10">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10"></div>
+            </div>
+
+            <div class="bg-transparent md:bg-white md:shadow-lg md:rounded-lg overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead class="hidden md:table-header-group">
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal border-b-2 border-gray-200">
+                            <th class="py-3 px-4 text-center w-12">STT</th>
+                            <th class="py-3 px-4">Nội dung hồ sơ</th>
+                            <th class="py-3 px-4 text-center w-20">Có</th>
+                            <th class="py-3 px-4 w-1/3">Ghi chú / Số lượng</th>
+                            <th class="py-3 px-4 w-40">Hình ảnh</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="block md:table-row-group">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button onclick="saveData()" class="fixed bottom-6 right-4 bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl z-50 hover:bg-blue-700 active:scale-95 transition-all duration-200 border-2 border-white">
+            <i class="fas fa-save"></i>
+        </button>
     </div>
 
     <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 px-4 py-3 rounded-lg shadow-xl transition-all duration-300 z-[60] flex items-center font-medium opacity-0 pointer-events-none min-w-[200px] justify-center text-sm">
@@ -101,8 +114,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // --- USER CONFIGURATION ---
+        // --- CONFIG ---
         const firebaseConfig = { 
             apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
             authDomain: "tavietnam-78ae8.firebaseapp.com", 
@@ -115,8 +129,62 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const storage = getStorage(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        // --- DATA DEFINITIONS ---
+        // --- STATE ---
+        let currentUser = null;
+        let currentUploadBtn = null;
+        let currentRouteCode = null;
+
+        // --- AUTH FUNCTIONS ---
+        window.loginGoogle = () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    showToast("Đăng nhập thành công!", "success");
+                }).catch((error) => {
+                    console.error(error);
+                    showToast("Lỗi đăng nhập: " + error.message, "error");
+                });
+        };
+
+        window.logout = () => {
+            signOut(auth).then(() => {
+                showToast("Đã đăng xuất", "info");
+                window.location.reload();
+            });
+        };
+
+        // --- AUTH OBSERVER ---
+        onAuthStateChanged(auth, (user) => {
+            const overlay = document.getElementById('login-overlay');
+            const content = document.getElementById('app-content');
+            
+            if (user) {
+                // Logged In
+                currentUser = user;
+                overlay.classList.add('hidden');
+                content.classList.remove('hidden');
+                
+                // Show user info
+                document.getElementById('user-info').innerHTML = `
+                    <img src="${user.photoURL}" class="w-4 h-4 rounded-full mr-1">
+                    <span>${user.displayName}</span>
+                `;
+                
+                // Init app data if not already
+                if (document.getElementById('routeSelect').options.length === 1) {
+                    initApp();
+                }
+            } else {
+                // Not Logged In
+                currentUser = null;
+                overlay.classList.remove('hidden');
+                content.classList.add('hidden');
+            }
+        });
+
+        // --- DATA & UI ---
         const routes = [
             "AK_VT (An Khánh - Việt Thành)", "BL-HX (Bình Lợi - Hỏa Xa)", "BT_TDA (Bình Triệu - Thanh Đa)",
             "BT_HBP (Bình Thái - Hiệp Bình Phước)", "BT_HX (Bình Triệu - Hỏa Xa)", "CL-TDD (Cát Lái - Thủ Đức Đông)",
@@ -168,16 +236,7 @@
             }
         ];
 
-        let currentUploadBtn = null;
-        let currentRouteCode = null;
-
         function initApp() {
-            const statusIndicator = document.getElementById('status-indicator');
-            if(db) {
-                statusIndicator.innerHTML = '<div class="w-2 h-2 bg-green-400 rounded-full mr-1"></div><span class="text-[10px] text-green-200">Online</span>';
-                statusIndicator.classList.replace('bg-blue-900', 'bg-green-800');
-            }
-
             const select = document.getElementById('routeSelect');
             routes.forEach(route => {
                 const opt = document.createElement('option');
@@ -199,9 +258,18 @@
         window.renderTable = (data, isNew = false) => {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
+            
+            // Show update info
+            const updateInfoDiv = document.getElementById('last-update-info');
+            if (data.updatedBy && data.lastUpdated) {
+                const date = new Date(data.lastUpdated).toLocaleString('vi-VN');
+                updateInfoDiv.innerHTML = `<i class="fas fa-history"></i> Cập nhật: <b>${date}</b> bởi <b>${data.updatedBy}</b>`;
+                updateInfoDiv.classList.remove('hidden');
+            } else {
+                updateInfoDiv.innerHTML = 'Chưa có dữ liệu cập nhật';
+            }
 
             categories.forEach(cat => {
-                // Tiêu đề lớn
                 const catRow = `<tr class="block md:table-row bg-blue-50 border-b md:border-none mt-4 md:mt-0 rounded-t-lg"><td colspan="5" class="py-2 px-3 text-blue-800 font-bold uppercase text-xs md:text-sm">${cat.title}</td></tr>`;
                 tbody.insertAdjacentHTML('beforeend', catRow);
 
@@ -230,7 +298,6 @@
         function renderRow(tbody, key, stt, name, rowData = {}, defaultCheck = false) {
             const isChecked = (rowData.hasFile !== undefined) ? rowData.hasFile : defaultCheck;
             const checkedAttr = isChecked ? 'checked' : '';
-            // Màu nền: Nếu checked thì trắng, không thì xám mờ
             const rowClass = isChecked ? 'bg-white opacity-100' : 'bg-gray-100 opacity-60'; 
 
             const noteVal = rowData.note || '';
@@ -254,11 +321,8 @@
                 `;
             }
 
-            // HTML Structure:
-            // Mobile: Card layout (flex-col). Desktop: Table layout.
             const row = `
                 <tr class="block md:table-row mb-3 md:mb-0 rounded-lg shadow-sm md:shadow-none border md:border-b border-gray-200 ${rowClass} transition-all duration-200" id="row-${key}">
-                    
                     <td class="block md:table-cell p-3 md:py-2 md:px-4 md:border-none border-b border-gray-100">
                         <div class="flex justify-between items-start md:hidden mb-1">
                             <span class="font-bold text-gray-800 text-sm w-5/6">${stt}. ${name}</span>
@@ -266,7 +330,6 @@
                         <span class="hidden md:block font-medium text-gray-800">${name}</span>
                         <span class="hidden md:block text-gray-400 text-xs text-center">${stt}</span>
                     </td>
-
                     <td class="block md:table-cell p-2 md:py-2 md:px-4 text-center md:align-middle">
                         <div class="flex items-center justify-between md:justify-center">
                             <span class="md:hidden text-xs font-bold text-gray-500 uppercase">Có hồ sơ?</span>
@@ -275,15 +338,11 @@
                             </label>
                         </div>
                     </td>
-
                     <td class="block md:table-cell p-2 md:py-2 md:px-4">
-                        <input type="text" data-key="${key}_note" class="w-full border border-gray-300 bg-white rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition" placeholder="Ghi chú..." value="${noteVal}">
+                        <input type="text" data-key="${key}_note" class="w-full border border-gray-300 bg-white rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ghi chú..." value="${noteVal}">
                     </td>
-
                     <td class="block md:table-cell p-2 md:py-2 md:px-4">
-                        <div id="img-container-${key}">
-                            ${imageHtml}
-                        </div>
+                        <div id="img-container-${key}">${imageHtml}</div>
                         <input type="hidden" data-key="${key}_imageUrl" value="${imageUrl}">
                     </td>
                 </tr>
@@ -294,19 +353,16 @@
         window.toggleRowStyle = (checkbox, key) => {
             const row = document.getElementById(`row-${key}`);
             if (checkbox.checked) {
-                row.classList.remove('bg-gray-100', 'opacity-60');
-                row.classList.add('bg-white', 'opacity-100');
+                row.classList.replace('bg-gray-100', 'bg-white');
+                row.classList.replace('opacity-60', 'opacity-100');
             } else {
-                row.classList.add('bg-gray-100', 'opacity-60');
-                row.classList.remove('bg-white', 'opacity-100');
+                row.classList.replace('bg-white', 'bg-gray-100');
+                row.classList.replace('opacity-100', 'opacity-60');
             }
         };
 
         window.triggerUpload = (key) => {
-            if (!currentRouteCode) {
-                showToast("Vui lòng chọn tuyến đường dây trước!", "error");
-                return;
-            }
+            if (!currentRouteCode) { showToast("Vui lòng chọn tuyến đường dây!", "error"); return; }
             currentUploadBtn = key;
             document.getElementById('globalFileInput').click();
         };
@@ -314,49 +370,38 @@
         async function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file || !currentUploadBtn) return;
+            if (!currentUser) { showToast("Vui lòng đăng nhập lại", "error"); return; }
 
             const key = currentUploadBtn;
             const container = document.getElementById(`img-container-${key}`);
-            
-            container.innerHTML = `<div class="flex items-center text-blue-500 bg-blue-50 p-1 rounded animate-pulse"><i class="fas fa-spinner fa-spin mr-1"></i><span class="text-xs">Đang tải...</span></div>`;
+            container.innerHTML = `<span class="text-blue-500 text-xs"><i class="fas fa-spinner fa-spin"></i> Uploading...</span>`;
 
             try {
                 const filename = `${key}_${Date.now()}_${file.name}`;
                 const storageRef = sRef(storage, `images/${currentRouteCode}/${filename}`);
-                
                 await uploadBytes(storageRef, file);
                 const downloadURL = await getDownloadURL(storageRef);
 
-                const inputHidden = document.querySelector(`input[data-key="${key}_imageUrl"]`);
-                inputHidden.value = downloadURL;
-
+                document.querySelector(`input[data-key="${key}_imageUrl"]`).value = downloadURL;
                 container.innerHTML = `
                     <div class="flex items-center mt-2 md:mt-0">
-                        <a href="${downloadURL}" target="_blank" class="flex items-center text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200 mr-2 font-bold">
-                            <i class="fas fa-check mr-1"></i> <span class="text-xs">Xong</span>
-                        </a>
+                        <a href="${downloadURL}" target="_blank" class="text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200 mr-2 text-xs font-bold"><i class="fas fa-check"></i> Xong</a>
                         <button onclick="triggerUpload('${key}')" class="text-gray-400 p-1"><i class="fas fa-pen text-xs"></i></button>
                     </div>
                 `;
-                
-                // Auto save
                 saveData(true); 
-
             } catch (error) {
-                console.error("Upload failed", error);
-                showToast("Lỗi: " + error.message, "error");
-                container.innerHTML = `<button onclick="triggerUpload('${key}')" class="text-red-500 text-xs"><i class="fas fa-exclamation-triangle"></i> Lỗi</button>`;
+                console.error(error);
+                showToast("Lỗi upload!", "error");
+                container.innerHTML = `<button onclick="triggerUpload('${key}')" class="text-red-500 text-xs">Lỗi. Thử lại</button>`;
             }
             event.target.value = '';
         }
 
         window.saveData = (silent = false) => {
-            if (!currentRouteCode) {
-                showToast("Chưa chọn hồ sơ!", "error");
-                return;
-            }
+            if (!currentUser) { showToast("Bạn phải đăng nhập để lưu!", "error"); return; }
+            if (!currentRouteCode) { showToast("Chưa chọn hồ sơ!", "error"); return; }
 
-            // Hiệu ứng nút save khi bấm
             if(!silent) {
                 const btn = document.querySelector('button[onclick="saveData()"]');
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -370,22 +415,27 @@
                 const parts = input.dataset.key.split('_');
                 const field = parts.pop();
                 const itemKey = parts.join('_');
-
                 if (!dataToSave[itemKey]) dataToSave[itemKey] = {};
-
-                if (input.type === 'checkbox') {
-                    dataToSave[itemKey][field] = input.checked;
-                } else {
-                    dataToSave[itemKey][field] = input.value;
-                }
+                
+                if (input.type === 'checkbox') dataToSave[itemKey][field] = input.checked;
+                else dataToSave[itemKey][field] = input.value;
             });
 
+            // --- AUDIT LOGGING ---
             dataToSave.lastUpdated = new Date().toISOString();
+            dataToSave.updatedBy = currentUser.displayName || currentUser.email;
+            dataToSave.updatedEmail = currentUser.email;
+            // ---------------------
 
             const dbRef = ref(db, 'records/' + currentRouteCode);
             set(dbRef, dataToSave)
                 .then(() => {
-                    if(!silent) showToast("Đã lưu thành công!", "success");
+                    if(!silent) showToast("Đã lưu dữ liệu!", "success");
+                    // Refresh audit info display immediately
+                    const updateInfoDiv = document.getElementById('last-update-info');
+                    const date = new Date().toLocaleString('vi-VN');
+                    updateInfoDiv.innerHTML = `<i class="fas fa-history"></i> Cập nhật: <b>${date}</b> bởi <b>${dataToSave.updatedBy}</b>`;
+                    updateInfoDiv.classList.remove('hidden');
                 })
                 .catch((error) => {
                     showToast("Lỗi: " + error.message, "error");
@@ -393,24 +443,21 @@
         };
 
         window.loadData = () => {
-            const routeCode = document.getElementById('routeSelect').value;
-            if (!routeCode) return;
-
+            if (!currentRouteCode) return;
             const loader = document.getElementById('loading');
             loader.classList.remove('hidden');
             document.getElementById('tableBody').innerHTML = ''; 
 
             const dbRef = ref(db);
-            get(child(dbRef, `records/${routeCode}`)).then((snapshot) => {
+            get(child(dbRef, `records/${currentRouteCode}`)).then((snapshot) => {
                 if (snapshot.exists()) {
                     renderTable(snapshot.val(), false);
                     showToast("Đã tải dữ liệu.", "info");
                 } else {
                     renderTable({}, true); 
-                    showToast("Dữ liệu mới (Tự động điền).", "success");
+                    showToast("Dữ liệu mới.", "success");
                 }
             }).catch((error) => {
-                console.error(error);
                 showToast("Lỗi tải dữ liệu.", "error");
             }).finally(() => {
                 loader.classList.add('hidden');
@@ -419,20 +466,14 @@
 
         function showToast(message, type = "info") {
             const toast = document.getElementById('toast');
-            
             let bgClass = 'bg-gray-800 text-white';
             if (type === 'error') bgClass = 'bg-red-600 text-white';
             if (type === 'success') bgClass = 'bg-green-600 text-white';
 
             toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 px-4 py-3 rounded-lg shadow-xl transition-all duration-300 z-[60] flex items-center font-medium opacity-100 min-w-[200px] justify-center text-sm ${bgClass}`;
             toast.innerHTML = message;
-            
-            setTimeout(() => {
-                toast.classList.replace('opacity-100', 'opacity-0');
-            }, 2500);
+            setTimeout(() => { toast.classList.replace('opacity-100', 'opacity-0'); }, 2500);
         }
-
-        initApp();
     </script>
 </body>
 </html>
